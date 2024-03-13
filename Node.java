@@ -50,9 +50,6 @@ public class Node {
         } else {
             builder.append("0");
         }
-
         return builder.toString();
     }
-
 }
-

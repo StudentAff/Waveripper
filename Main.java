@@ -51,15 +51,20 @@ public class Main {
 
         List result = null;
 
-        if (operator == '+') {
-            result = add(list1, list2);
-        } else if (operator == '-') {
-            result = subtract(list1, list2);
-        } else if (operator == '*') {
-            // Implement multiplication
-        } else {
-            return "Invalid operator";
+        switch (operator) {
+            case '+':
+                result = add(list1, list2);
+                break;
+            case '-':
+                result = subtract(list1, list2);
+                break;
+            case '*':
+                result = multiply(list1, list2);
+                break;
+            default:
+                return "Invalid operator";
         }
+
 
         if (result != null) {
             String resultString = result.toString();
@@ -75,22 +80,35 @@ public class Main {
         List list = new List();
         String[] terms = polynomial.split("\\+");
         for (String term : terms) {
-            String[] parts = term.split("(?=\\b[-+*/]\\b)");
-            int coefficient = Integer.parseInt(parts[0].replaceAll("[^0-9-]", ""));
-            int exponentX = 0, exponentY = 0, exponentZ = 0;
-            for (int i = 1; i < parts.length; i++) {
-                if (parts[i].contains("x")) {
-                    exponentX = Integer.parseInt(parts[i].replaceAll("\\D", ""));
-                } else if (parts[i].contains("y")) {
-                    exponentY = Integer.parseInt(parts[i].replaceAll("\\D", ""));
-                } else if (parts[i].contains("z")) {
-                    exponentZ = Integer.parseInt(parts[i].replaceAll("\\D", ""));
+            String[] parts = term.split("(?=[-+])"); // Split by + or -
+            for (String part : parts) {
+                String[] factors = part.split("(?=[xyz])"); // Split by x, y, or z
+                int coefficient = 1;
+                int exponentX = 0, exponentY = 0, exponentZ = 0;
+                for (String factor : factors) {
+                    if (factor.matches("-?\\d+")) { // Check if the factor is a number
+                        coefficient *= Integer.parseInt(factor);
+                    } else {
+                        if (factor.contains("x")) {
+                            exponentX = extractExponent(factor);
+                        } else if (factor.contains("y")) {
+                            exponentY = extractExponent(factor);
+                        } else if (factor.contains("z")) {
+                            exponentZ = extractExponent(factor);
+                        }
+                    }
                 }
+                list.addTerm(coefficient, exponentX, exponentY, exponentZ);
             }
-            list.addTerm(coefficient, exponentX, exponentY, exponentZ);
         }
         return list;
     }
+
+    private int extractExponent(String factor) {
+        String[] parts = factor.split("\\^");
+        return parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+    }
+
 
 
     private List add(List list1, List list2) {
@@ -98,35 +116,36 @@ public class Main {
         Node current1 = list1.head;
         Node current2 = list2.head;
 
-        while (current1 != null || current2 != null) {
-            if (current1 == null) {
-                result.addTerm(current2.coefficient, current2.exponentX, current2.exponentY, current2.exponentZ);
-                current2 = current2.next;
-            } else if (current2 == null) {
+        while (current1 != null && current2 != null) {
+            int comparison = compareTerms(current1, current2);
+            if (comparison < 0) {
                 result.addTerm(current1.coefficient, current1.exponentX, current1.exponentY, current1.exponentZ);
                 current1 = current1.next;
+            } else if (comparison > 0) {
+                result.addTerm(current2.coefficient, current2.exponentX, current2.exponentY, current2.exponentZ);
+                current2 = current2.next;
             } else {
-                int comparison = compareTerms(current1, current2);
-                if (comparison < 0) {
-                    result.addTerm(current1.coefficient, current1.exponentX, current1.exponentY, current1.exponentZ);
-                    current1 = current1.next;
-                } else if (comparison > 0) {
-                    result.addTerm(current2.coefficient, current2.exponentX, current2.exponentY, current2.exponentZ);
-                    current2 = current2.next;
-                } else {
-                    int newCoefficient = current1.coefficient + current2.coefficient;
-                    if (newCoefficient != 0) {
-                        result.addTerm(newCoefficient, current1.exponentX, current1.exponentY, current1.exponentZ);
-                    }
-                    current1 = current1.next;
-                    current2 = current2.next;
+                int newCoefficient = current1.coefficient + current2.coefficient;
+                if (newCoefficient != 0) {
+                    result.addTerm(newCoefficient, current1.exponentX, current1.exponentY, current1.exponentZ);
                 }
+                current1 = current1.next;
+                current2 = current2.next;
             }
+        }
+
+        while (current1 != null) {
+            result.addTerm(current1.coefficient, current1.exponentX, current1.exponentY, current1.exponentZ);
+            current1 = current1.next;
+        }
+
+        while (current2 != null) {
+            result.addTerm(current2.coefficient, current2.exponentX, current2.exponentY, current2.exponentZ);
+            current2 = current2.next;
         }
 
         return result;
     }
-
     private List subtract(List list1, List list2) {
         List result = new List();
         Node current1 = list1.head;
@@ -157,9 +176,32 @@ public class Main {
                 }
             }
         }
-
+        result.combineLikeTerms();
         return result;
     }
+
+
+    private List multiply(List list1, List list2) {
+        List result = new List();
+
+        Node current1 = list1.head;
+        while (current1 != null) {
+            Node current2 = list2.head;
+            while (current2 != null) {
+                int newCoefficient = current1.coefficient * current2.coefficient;
+                int newExponentX = current1.exponentX + current2.exponentX;
+                int newExponentY = current1.exponentY + current2.exponentY;
+                int newExponentZ = current1.exponentZ + current2.exponentZ;
+                result.addTerm(newCoefficient, newExponentX, newExponentY, newExponentZ);
+                current2 = current2.next;
+            }
+            current1 = current1.next;
+        }
+
+        result.combineLikeTerms();
+        return result;
+    }
+
 
     private int compareTerms(Node term1, Node term2) {
         if (term1.exponentX != term2.exponentX) {
