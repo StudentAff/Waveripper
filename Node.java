@@ -6,6 +6,7 @@ public class Node {
     Node next;
 
     public Node(int coefficient, int exponentX, int exponentY, int exponentZ) {
+        // Initializes a Node with coefficient and exponents
         this.coefficient = coefficient;
         this.exponentX = exponentX;
         this.exponentY = exponentY;
@@ -15,8 +16,10 @@ public class Node {
 
     @Override
     public String toString() {
+        // Converts the Node into a string representation and appends coefficients based on conditions
         StringBuilder builder = new StringBuilder();
 
+        // Appends coefficient with exponents if they are non-zero
         if (coefficient != 0) {
             if (builder.length() > 0 && coefficient > 0) {
                 builder.append("+");

@@ -11,6 +11,7 @@ class List {
     }
 
     public void addTerm(int coefficient, int exponentX, int exponentY, int exponentZ) {
+        // Adds a new term to the list with the given coefficient and exponents
         Node newNode = new Node(coefficient, exponentX, exponentY, exponentZ);
 
         if (head == null) {
@@ -23,6 +24,7 @@ class List {
     }
 
     public void combineLikeTerms() {
+        // Combines like terms in the list by summing coefficients with the same exponents
         Map<String, Integer> termsMap = new HashMap<>();
         Node current = head;
 
@@ -39,10 +41,10 @@ class List {
             current = current.next;
         }
 
-        // Clear the list
+        // Clears the list
         head = null;
 
-        // Rebuild the list with combined terms
+        // Rebuilds the list with combined terms
         for (Map.Entry<String, Integer> entry : termsMap.entrySet()) {
             String[] exponents = entry.getKey().split("_");
             int coefficient = entry.getValue();

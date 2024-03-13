@@ -12,6 +12,7 @@ public class Main {
     }
 
     public void run() {
+        // Reads input from a file, processes each operation, and writes the results to an output file
         try {
             Scanner scanner = new Scanner(new File("input.txt"));
             FileWriter writer = new FileWriter("output.txt");
@@ -32,7 +33,7 @@ public class Main {
             }
 
             scanner.close();
-            writer.close(); // Close the FileWriter
+            writer.close();
 
             System.out.println("Output file 'output.txt' created successfully.");
         } catch (FileNotFoundException e) {
@@ -76,17 +77,17 @@ public class Main {
     }
 
 
-    private List parsePolynomial(String polynomial) {
+    private List parsePolynomial(String polynomial) { // Parses a polynomial string and converts it into a list of terms
         List list = new List();
         String[] terms = polynomial.split("\\+");
         for (String term : terms) {
-            String[] parts = term.split("(?=[-+])"); // Split by + or -
+            String[] parts = term.split("(?=[-+])"); // Splits by + or -
             for (String part : parts) {
-                String[] factors = part.split("(?=[xyz])"); // Split by x, y, or z
+                String[] factors = part.split("(?=[xyz])"); // Splits by x, y, or z
                 int coefficient = 1;
                 int exponentX = 0, exponentY = 0, exponentZ = 0;
                 for (String factor : factors) {
-                    if (factor.matches("-?\\d+")) { // Check if the factor is a number
+                    if (factor.matches("-?\\d+")) { // Checks if the factor is a number
                         coefficient *= Integer.parseInt(factor);
                     } else {
                         if (factor.contains("x")) {
@@ -203,7 +204,7 @@ public class Main {
     }
 
 
-    private int compareTerms(Node term1, Node term2) {
+    private int compareTerms(Node term1, Node term2) { // Compares two terms based on their exponents
         if (term1.exponentX != term2.exponentX) {
             return Integer.compare(term1.exponentX, term2.exponentX);
         } else if (term1.exponentY != term2.exponentY) {
